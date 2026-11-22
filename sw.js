@@ -1,4 +1,4 @@
-const CACHE_NAME = "vox-liturgiae-v2";
+const CACHE_NAME = "vox-liturgiae-v4";
 const CORE_ASSETS = [
   "./",
   "./index.html",

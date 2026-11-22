@@ -14,6 +14,10 @@ Publish this folder as the root of a GitHub Pages site (repository root or `/doc
 - Speech recognition is never allowed to use the browser's default processing mode. It is offered only when the browser exposes `processLocally`, `available()`, and language-pack installation APIs, and Latin is reported available locally. Current MDN compatibility data says Chrome for Android does not support `processLocally`; absent that API, recording and self-assessment remain available.
 - Android Gemini Nano/AICore and ML Kit GenAI are native Android APIs; a GitHub Pages document cannot call their native SDK. Chrome's built-in Prompt API documentation excludes Chrome for Android. Study recommendations therefore use a small deterministic offline scheduler.
 
+## Why no bundled recognition model
+
+A website-bundled model was evaluated and rejected for this version. Vosk's recommended small models are about 50 MB and use about 300 MB at runtime, and its official catalogue has no ready Latin model. Whisper's tiny multilingual model is MIT-licensed and includes a Latin token, but quantized browser builds still add tens of megabytes and hundreds of megabytes of runtime memory; Whisper's own model card warns of uneven low-resource-language accuracy and hallucinated text. That tradeoff is too large for an optional enhancement on ordinary Android phones, and would risk presenting weak transcript output as pronunciation assessment. The app therefore uses verified browser-local recognition only, or the recording/self-assessment workflow otherwise.
+
 ## Reference audio credit
 
 - “Ave Maria in Latin language” by OrbiliusMagister: <https://commons.wikimedia.org/wiki/File:Ave_Maria_in_Latin_language.ogg>
@@ -29,5 +33,7 @@ All three recordings are public domain on Wikimedia Commons and bundled as Ogg V
 - [MDN — SpeechRecognition `available()`](https://developer.mozilla.org/en-US/docs/Web/API/SpeechRecognition/available_static)
 - [MDN — SpeechSynthesisVoice `localService`](https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesisVoice/localService)
 - [Android — Gemini Nano and ML Kit GenAI](https://developer.android.com/ai/gemini-nano)
+- [Vosk — official model catalogue](https://alphacephei.com/vosk/models)
+- [OpenAI Whisper — model card](https://github.com/openai/whisper/blob/main/model-card.md)
 
 Android Chrome installation, microphone permission, installed voices, and airplane-mode behavior require a physical Android device for final acceptance testing.

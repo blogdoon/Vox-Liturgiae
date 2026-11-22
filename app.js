@@ -1,7 +1,7 @@
 "use strict";
 
 const STORAGE_KEY = "vox-liturgiae-progress";
-const CACHE_NAME = "vox-liturgiae-v2";
+const CACHE_NAME = "vox-liturgiae-v4";
 const CORE_PATHS = [
   "./index.html", "./styles.css", "./app.js", "./manifest.webmanifest",
   "./assets/icon.svg", "./assets/icon-192.png", "./assets/icon-512.png",
@@ -254,7 +254,7 @@ function saveProgress() {
 function addHistory(event) {
   state.history.push({ ...event, at: new Date().toISOString() });
   state.history = state.history.slice(-5000);
-  saveProgress();
+  return saveProgress();
 }
 
 function showView(name) {
@@ -270,10 +270,7 @@ function showView(name) {
     else button.removeAttribute("aria-current");
   });
   if (name === "home") renderHome();
-  if (name === "cards") {
-    reviewedCards = new Set();
-    renderCards();
-  }
+  if (name === "cards") renderCards();
   if (name === "device") refreshCapabilities();
 }
 
@@ -383,12 +380,16 @@ function openLesson(lessonId) {
     const audio = $("#reference-audio");
     audio.src = activeLesson.audio;
     audio.hidden = false;
+    $(".audio-actions", $(".lesson-audio")).hidden = false;
+    $(".speed-control", $(".lesson-audio")).hidden = false;
     $("#lesson-audio-note").textContent = "Bundled reference recording; replay it at normal, slow, very slow, or adjustable speed.";
     $("#audio-credit").textContent = AUDIO_CREDITS[activeLesson.id] || "";
     $("#lesson-open-lab").hidden = true;
   } else {
     $("#reference-audio").removeAttribute("src");
     $("#reference-audio").hidden = true;
+    $(".audio-actions", $(".lesson-audio")).hidden = true;
+    $(".speed-control", $(".lesson-audio")).hidden = true;
     $("#lesson-audio-note").textContent = "There is no recording bundled for this lesson. Open the Pronunciation Lab for the included ecclesiastical Latin reference recording; local device voices are optional and unverified.";
     $("#audio-credit").textContent = "";
     $("#lesson-open-lab").hidden = false;
@@ -581,7 +582,7 @@ function setHymnMask(masked) {
   $("#hymn-reveal").textContent = masked ? "Show the Latin" : "Hide the Latin";
 }
 
-function speakText(text, rate = 0.82) {
+function speakText(text, rate = Number($("#tts-rate")?.value || 0.82)) {
   if (!("speechSynthesis" in window) || !selectedVoice || selectedVoice.localService !== true) {
     showNotice("Select a voice reported as a local synthesizer on the Device page. Bundled reference audio remains available.", true);
     return;
@@ -704,8 +705,7 @@ async function probeLocalRecognition() {
   const prototype = recognitionConstructor?.prototype;
   const hasLocalControls = !!recognitionConstructor &&
     !!prototype && "processLocally" in prototype &&
-    typeof recognitionConstructor.available === "function" &&
-    typeof recognitionConstructor.install === "function";
+    typeof recognitionConstructor.available === "function";
 
   if (!hasLocalControls) {
     latinRecognitionStatus = "unsupported";
@@ -744,7 +744,7 @@ async function probeLocalRecognition() {
         ? "A local Latin pack is available to install. The browser may download the pack after you confirm."
         : availableText;
     startButton.disabled = result !== "available";
-    installButton.hidden = result !== "downloadable";
+    installButton.hidden = result !== "downloadable" || typeof recognitionConstructor.install !== "function";
   } catch (error) {
     latinRecognitionStatus = "error";
     recognitionProbeError = error.message;
@@ -807,7 +807,7 @@ function transcriptSimilarity(actual, expected) {
 }
 
 async function installLatinPack() {
-  if (latinRecognitionStatus !== "downloadable" || !recognitionConstructor) return;
+  if (latinRecognitionStatus !== "downloadable" || typeof recognitionConstructor?.install !== "function") return;
   const accepted = window.confirm("Your browser may download a Latin speech-recognition language pack. Recognition itself will be required to run on-device; the app never enables remote recognition. Continue?");
   if (!accepted) return;
   $("#recognition-install").disabled = true;
@@ -936,8 +936,10 @@ function saveSelfCheck() {
   const checked = $$("input[type=checkbox]:checked", $("#self-check")).map((input) => input.value);
   state.selfChecks.push({ at: new Date().toISOString(), checked });
   state.selfChecks = state.selfChecks.slice(-500);
-  addHistory({ type: "self-check", item: "ave-maria", correct: checked.length >= 3 });
-  $("#self-check-status").textContent = `Self-check saved: ${checked.length} of 4 items checked. This is your own reflection, not an automated pronunciation score.`;
+  const saved = addHistory({ type: "self-check", item: "ave-maria", correct: checked.length >= 3 });
+  $("#self-check-status").textContent = saved
+    ? `Self-check saved: ${checked.length} of 4 items checked. This is your own reflection, not an automated pronunciation score.`
+    : "The self-check could not be saved. Your browser may have blocked local storage.";
 }
 
 function answerListening(event) {
@@ -1037,6 +1039,9 @@ function bindEvents() {
     selectedVoice = voice?.localService === true ? voice : null;
     refreshVoiceControls();
     if (selectedVoice) showNotice(`Selected ${selectedVoice.name} (${selectedVoice.lang}). This optional device voice is not an authoritative Latin reference.`);
+  });
+  $("#tts-rate").addEventListener("input", (event) => {
+    $("#tts-rate-value").value = `${Number(event.target.value).toFixed(2)}×`;
   });
   $("#lesson-lines").addEventListener("click", (event) => {
     const wordButton = event.target.closest("[data-word]");

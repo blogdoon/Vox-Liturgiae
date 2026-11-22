@@ -129,6 +129,7 @@ h2 { margin-bottom: 10px; font-size: 25px; }
 .device-card h2 { font-size: 22px; }
 .device-card > label { display: block; margin: 12px 0 6px; font-size: 13px; font-weight: 700; }
 .device-card select { width: 100%; min-height: 46px; padding: 8px 10px; border: 1px solid #cad3ca; border-radius: 10px; background: #fff; color: var(--ink); }
+#tts-rate { width: 100%; min-height: 40px; accent-color: var(--green-2); }
 .capability-list { display: grid; grid-template-columns: minmax(120px, 1fr) minmax(0, 1.4fr); gap: 9px 14px; margin: 13px 0 17px; font-size: 13px; }
 .capability-list dt { color: var(--muted); }
 .capability-list dd { margin: 0; font-weight: 650; overflow-wrap: anywhere; }
