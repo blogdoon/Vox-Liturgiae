@@ -1,0 +1,17 @@
+{
+  "id": "./",
+  "name": "Vox Liturgiae — Latin for the Liturgy",
+  "short_name": "Vox Liturgiae",
+  "description": "A private, offline-first Latin tutor for prayer, hymns, and the Mass.",
+  "lang": "en",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f7f5ee",
+  "theme_color": "#183c32",
+  "icons": [
+    { "src": "./assets/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "./assets/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

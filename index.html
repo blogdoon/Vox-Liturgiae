@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#183c32">
+    <meta name="description" content="A private, offline-first Latin tutor for prayer, hymns, and the Mass.">
+    <link rel="manifest" href="./manifest.webmanifest">
+    <link rel="icon" href="./assets/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="./assets/icon-192.png">
+    <link rel="stylesheet" href="./styles.css">
+    <title>Vox Liturgiae — Learn Latin</title>
+    <script src="./app.js" defer></script>
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="./" aria-label="Vox Liturgiae home">
+        <span class="brand-mark" aria-hidden="true">V</span>
+        <span><strong>Vox Liturgiae</strong><small>Latin for the liturgy</small></span>
+      </a>
+      <div class="top-actions">
+        <span id="network-status" class="status-pill" role="status">Checking connection</span>
+        <button id="install-button" class="button button-small button-outline" hidden>Install</button>
+      </div>
+    </header>
+
+    <main id="app">
+      <div id="notice" class="notice" role="status" aria-live="polite" hidden></div>
+
+      <section id="view-home" class="view active" aria-labelledby="home-title">
+        <div class="hero">
+          <div>
+            <p class="eyebrow">YOUR PRIVATE LATIN TUTOR</p>
+            <h1 id="home-title">A little Latin,<br>learned well.</h1>
+            <p class="muted">Study prayers, hymns, and the responses of the Mass — right here on your device.</p>
+          </div>
+          <div class="hero-seal" aria-hidden="true"><span>✝</span><small>AD<br>MAIOREM<br>DEI GLORIAM</small></div>
+        </div>
+
+        <div class="stat-grid" aria-label="Your learning progress">
+          <article class="stat-card"><strong id="stat-answered">0</strong><span>answers tried</span></article>
+          <article class="stat-card"><strong id="stat-accuracy">—</strong><span>quiz accuracy</span></article>
+          <article class="stat-card"><strong id="stat-cards">0</strong><span>cards reviewed</span></article>
+        </div>
+
+        <section class="section-block">
+          <div class="section-heading"><div><p class="eyebrow">A GOOD NEXT STEP</p><h2>For today</h2></div></div>
+          <div id="recommendations" class="recommendation-list"></div>
+        </section>
+
+        <section class="section-block">
+          <div class="section-heading"><div><p class="eyebrow">YOUR COURSE</p><h2>Begin or continue</h2></div><button class="text-button" data-go="lessons">All lessons</button></div>
+          <div id="home-lessons" class="lesson-grid"></div>
+        </section>
+
+        <aside class="privacy-note"><span aria-hidden="true">◎</span><p><strong>Private by design.</strong> Lessons, progress, and microphone practice stay on this device. No account, analytics, or cloud AI.</p></aside>
+      </section>
+
+      <section id="view-lessons" class="view" aria-labelledby="lessons-title" hidden>
+        <div id="lesson-index">
+          <p class="eyebrow">THE COURSE</p><h1 id="lessons-title">Lessons</h1>
+          <p class="muted">Short guided lessons in prayer, hymnody, and the responses of the Mass.</p>
+          <div id="lesson-list" class="lesson-grid"></div>
+        </div>
+        <article id="lesson-detail" class="lesson-detail" hidden>
+          <button id="lesson-back" class="text-button back-button">← All lessons</button>
+          <div class="lesson-heading"><div><p id="lesson-level" class="eyebrow"></p><h1 id="lesson-name"></h1></div><span id="lesson-tag" class="tag"></span></div>
+          <p id="lesson-intro" class="muted"></p>
+          <div id="lesson-lines" class="line-list"></div>
+          <div id="hymn-tools" class="hymn-tools" hidden>
+            <button id="hymn-reveal" class="button button-outline">Hide the Latin</button>
+            <button id="hymn-remembered" class="button button-primary">I recalled it</button>
+          </div>
+          <section class="lesson-audio" aria-labelledby="lesson-audio-title">
+            <div class="section-heading"><div><p class="eyebrow">LISTEN &amp; REPEAT</p><h2 id="lesson-audio-title">Pronunciation</h2></div></div>
+            <p id="lesson-audio-note" class="muted"></p>
+            <audio id="reference-audio" controls preload="none"></audio>
+            <div class="audio-actions">
+              <button id="pause-reference" class="button button-outline" type="button">Pause</button>
+              <button class="button button-outline speed-button" data-speed="1">Normal</button>
+              <button class="button button-outline speed-button" data-speed="0.72">Slow</button>
+              <button class="button button-outline speed-button" data-speed="0.5">Very slow</button>
+              <button id="repeat-button" class="button button-outline" aria-pressed="false">Repeat: off</button>
+            </div>
+            <label class="speed-control" for="reference-speed">Adjust speed <output id="reference-speed-value">1.00×</output>
+              <input id="reference-speed" type="range" min="0.4" max="1.25" step="0.05" value="1">
+            </label>
+            <p id="audio-credit" class="fine-print"></p>
+            <button id="lesson-open-lab" class="button button-outline" type="button" data-go="practice" hidden>Open the Pronunciation Lab</button>
+          </section>
+          <section class="quiz-card">
+            <div class="section-heading"><div><p class="eyebrow">CHECK YOUR RECALL</p><h2>Quick practice</h2></div></div>
+            <p id="quiz-prompt" class="quiz-prompt">Choose a lesson to begin.</p>
+            <div id="quiz-options" class="choice-list"></div>
+            <p id="quiz-feedback" class="feedback" aria-live="polite"></p>
+            <button id="quiz-next" class="button button-primary" hidden>Next question</button>
+          </section>
+        </article>
+      </section>
+
+      <section id="view-cards" class="view" aria-labelledby="cards-title" hidden>
+        <p class="eyebrow">SPACED REVIEW</p><h1 id="cards-title">Vocabulary cards</h1>
+        <p class="muted">Mark what you recall. Difficult words come back sooner; intervals are stored only on this device.</p>
+        <div id="card-empty" class="empty-state" hidden><h2>All caught up</h2><p>Choose a lesson to add its vocabulary to your review.</p><button class="button button-primary" data-go="lessons">Browse lessons</button></div>
+        <article id="flashcard" class="flashcard" hidden>
+          <p id="card-counter" class="eyebrow"></p>
+          <div class="card-face">
+            <span id="card-category" class="tag"></span>
+            <h2 id="card-front" lang="la"></h2>
+            <p id="card-hint" class="muted"></p>
+            <div id="card-answer" class="card-answer" hidden>
+              <p id="card-back"></p>
+              <button id="card-speak" class="text-button" disabled>Play with selected local voice</button>
+              <small id="card-speak-note" class="fine-print"></small>
+            </div>
+          </div>
+          <button id="card-reveal" class="button button-primary button-wide">Reveal meaning</button>
+          <div id="card-rating" class="rating-actions" hidden>
+            <button id="card-again" class="button button-outline">Need practice</button>
+            <button id="card-good" class="button button-primary">I remembered it</button>
+          </div>
+          <p id="card-schedule" class="fine-print"></p>
+        </article>
+      </section>
+
+      <section id="view-practice" class="view" aria-labelledby="practice-title" hidden>
+        <p class="eyebrow">SPEAKING &amp; LISTENING</p><h1 id="practice-title">Pronunciation lab</h1>
+        <p class="muted">The reference recording is authoritative. Device voices are optional practice aids and are not certified for ecclesiastical Latin.</p>
+
+        <article class="practice-card">
+          <p class="eyebrow">REFERENCE PRONUNCIATION</p>
+          <h2 lang="la">Ave Maria</h2>
+          <p lang="la" class="latin-display"><strong>Á</strong>-ve Ma-<strong>rí</strong>-a, <strong>grá</strong>-ti-a <strong>plé</strong>-na, <strong>Dó</strong>-mi-nus <strong>té</strong>-cum.</p>
+          <p class="muted">Acute accents and bold type mark the stressed syllables. Long vowels are not scored by this exercise.</p>
+          <audio id="lab-audio" controls preload="none" src="./assets/audio/ave-maria.ogg"></audio>
+          <div class="audio-actions">
+            <button id="pause-lab" class="button button-outline" type="button">Pause</button>
+            <button class="button button-outline lab-speed" data-speed="1">Normal</button>
+            <button class="button button-outline lab-speed" data-speed="0.72">Slow</button>
+            <button class="button button-outline lab-speed" data-speed="0.5">Very slow</button>
+            <button id="lab-repeat" class="button button-outline" aria-pressed="false">Repeat: off</button>
+          </div>
+          <label class="speed-control" for="lab-speed">Adjust speed <output id="lab-speed-value">1.00×</output>
+            <input id="lab-speed" type="range" min="0.4" max="1.25" step="0.05" value="1">
+          </label>
+          <p class="fine-print">Bundled reference: “Ave Maria in Latin language,” spoken in ecclesiastical pronunciation by an Italian speaker. Public domain; details in the project README.</p>
+        </article>
+
+        <article class="practice-card">
+          <p class="eyebrow">YOUR TURN</p><h2>Record and compare</h2>
+          <p class="muted">Recording happens in this tab only. It is not uploaded or saved after you close the page.</p>
+          <div class="record-actions"><button id="record-button" class="button button-record" type="button">● Start recording</button><button id="play-recording" class="button button-outline" type="button" disabled>Play your recording</button></div>
+          <p id="record-status" class="feedback" role="status" aria-live="polite">Microphone access is requested only when you start recording.</p>
+          <audio id="learner-audio" controls hidden></audio>
+          <fieldset id="self-check" class="self-check">
+            <legend>My self-assessment (not an automated score)</legend>
+            <label><input type="checkbox" value="vowels"> I formed the Latin vowels clearly</label>
+            <label><input type="checkbox" value="consonants"> I pronounced consonants distinctly</label>
+            <label><input type="checkbox" value="stress"> I followed the marked stress</label>
+            <label><input type="checkbox" value="pace"> I kept a steady, unhurried pace</label>
+          </fieldset>
+          <button id="save-self-check" class="button button-primary">Save my self-check</button>
+          <p id="self-check-status" class="fine-print" aria-live="polite"></p>
+        </article>
+
+        <article class="practice-card">
+          <p class="eyebrow">LISTENING COMPREHENSION</p><h2>What did you hear?</h2>
+          <p class="muted">Play the bundled prayer, then choose its final words. This tests listening recall, not your speech.</p>
+          <button id="listening-play" class="button button-outline">Play the reference</button>
+          <div id="listening-options" class="choice-list"></div>
+          <p id="listening-result" class="feedback" aria-live="polite"></p>
+        </article>
+
+        <article id="recognition-card" class="practice-card" hidden>
+          <p class="eyebrow">OPTIONAL ON-DEVICE RECOGNITION</p><h2>Speech transcript</h2>
+          <p id="recognition-lab-status" class="muted"></p>
+          <button id="recognition-start" class="button button-outline" disabled>Recognize locally</button>
+          <p id="recognition-result" class="feedback" aria-live="polite"></p>
+          <p class="fine-print">This is transcript text and text similarity only. It does not measure pronunciation quality or phonetic accuracy. The app never starts remote recognition.</p>
+        </article>
+      </section>
+
+      <section id="view-device" class="view" aria-labelledby="device-title" hidden>
+        <p class="eyebrow">THIS DEVICE</p><h1 id="device-title">Compatibility &amp; privacy</h1>
+        <p class="muted">Capabilities vary by browser, Android version, installed services, and language packs. Nothing here assumes every device is the same.</p>
+        <div class="device-card">
+          <h2>Browser &amp; offline</h2>
+          <dl id="basic-capabilities" class="capability-list"></dl>
+          <p class="fine-print">If an install prompt is not shown, use the browser's menu and choose “Install app” or “Add to Home screen” where available.</p>
+          <button id="refresh-capabilities" class="button button-outline">Refresh capabilities</button>
+        </div>
+        <div class="device-card">
+          <h2>System speech voices</h2>
+          <p class="muted">“Local service” is the browser's report about the synthesizer; it does not certify Latin quality or guarantee every device's offline behavior. Remote voices are listed but never used by this app.</p>
+          <label for="voice-select">Optional local practice voice</label>
+          <select id="voice-select"><option value="">No local voice selected</option></select>
+          <p id="voice-selected-note" class="fine-print">Reference audio remains the pronunciation standard.</p>
+          <ul id="voice-list" class="voice-list"></ul>
+        </div>
+        <div class="device-card">
+          <h2>On-device speech recognition</h2>
+          <dl id="recognition-capabilities" class="capability-list"></dl>
+          <button id="recognition-install" class="button button-outline" hidden>Install Latin language pack</button>
+          <p id="recognition-note" class="muted">Recognition is never switched to a remote service. A language pack download, if offered by your browser, happens only after you choose to install it.</p>
+        </div>
+        <div class="device-card">
+          <h2>Your learning data</h2>
+          <p class="muted">Progress is stored in this browser on this device. Export it for a backup or to move it to another browser.</p>
+          <div class="data-actions"><button id="export-data" class="button button-outline">Export progress</button><button id="import-button" class="button button-outline">Import progress</button><input id="import-file" type="file" accept="application/json,.json" hidden></div>
+          <p id="data-status" class="fine-print" aria-live="polite"></p>
+        </div>
+        <details class="device-card">
+          <summary><strong>Why AI features are limited</strong></summary>
+          <p class="muted">Android's Gemini Nano / AICore and ML Kit GenAI are native Android app APIs, not interfaces a GitHub Pages website can call. Chrome's built-in Gemini Nano Prompt API is not supported on Chrome for Android. Browser on-device speech recognition is used only if the browser explicitly exposes its local-processing API and Latin pack; otherwise use recording and self-assessment.</p>
+          <p class="muted">Learning recommendations are deterministic and work offline. No cloud model, external script, analytics, or account is used.</p>
+        </details>
+      </section>
+    </main>
+
+    <nav class="bottom-nav" aria-label="Main navigation">
+      <button class="nav-button active" data-view-target="home" aria-current="page"><span aria-hidden="true">⌂</span>Home</button>
+      <button class="nav-button" data-view-target="lessons"><span aria-hidden="true">▤</span>Lessons</button>
+      <button class="nav-button" data-view-target="cards"><span aria-hidden="true">◇</span>Cards</button>
+      <button class="nav-button" data-view-target="practice"><span aria-hidden="true">◉</span>Speak</button>
+      <button class="nav-button" data-view-target="device"><span aria-hidden="true">⚙</span>Device</button>
+    </nav>
+  </body>
+</html>
